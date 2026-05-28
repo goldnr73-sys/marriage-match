@@ -4,7 +4,7 @@
 
 > "감성 말고 현실. 내가 진짜 원하는 결혼 상대를 찾아드립니다."
 
-현실적인 결혼 조건(경제/가족/가치관/관계) 체크리스트 + AI 채팅 심리 분석을 결합해 맞춤형 결혼 상대 리포트를 생성하는 웹 앱.
+현실적인 결혼 조건(경제/가족/가치관/관계/외모) 체크리스트 + AI 채팅 심리 분석을 결합해 맞춤형 결혼 상대 리포트를 생성하는 웹 앱.
 
 ## 기술 스택
 
@@ -30,7 +30,7 @@ GROQ_API_KEY=your_groq_api_key_here
 
 ```
 / (랜딩)
-  → /checklist  (파트1: 현실 조건 체크리스트, 4카테고리)
+  → /checklist  (파트1: 현실 조건 체크리스트, 5카테고리)
     → /chat     (파트2: AI "아이"와 채팅 심리 분석, 8회 대화)
       → /result (분석 결과 — 조건 나열 + 심리 분석 + 공유)
 ```
@@ -40,7 +40,7 @@ GROQ_API_KEY=your_groq_api_key_here
 ```
 app/
   page.tsx                  # 랜딩 페이지
-  checklist/page.tsx        # 현실 조건 체크리스트 (4카테고리 스텝)
+  checklist/page.tsx        # 현실 조건 체크리스트 (5카테고리 스텝)
   chat/page.tsx             # AI 채팅 심리 분석 페이지
   test/page.tsx             # /chat 으로 리다이렉트 (하위 호환)
   result/page.tsx           # 분석 결과 + URL/이미지 공유
@@ -54,21 +54,22 @@ components/
 
 lib/
   types.ts                  # ChecklistData, ChatMessage, AnalysisResult 타입
-  checklist.ts              # 4카테고리 × 체크리스트 항목 데이터
+  checklist.ts              # 5카테고리 × 체크리스트 항목 데이터 (select/rating/text 타입)
   gemini.ts                 # Groq 클라이언트 + 분석 프롬프트 (파일명 유지)
   utils.ts                  # base64 인코딩/디코딩 유틸
 ```
 
 ## 파트 1: 현실 조건 체크리스트
 
-4개 카테고리를 단계별로 입력:
+5개 카테고리를 단계별로 입력:
 
 | 카테고리 | 항목 |
 |---------|------|
 | 💰 경제 | 최소 연봉, 최소 자산, 부채 허용 여부, 직업 안정성, 부모님 노후 준비, 결혼 지원 규모 |
-| 🏠 가족/생활 | 거주 지역, 시댁/처가 관계, 종교 |
+| 🏠 가족/생활 | 거주 지역, 시댁/처가 관계, 종교, 나이 차이 허용 범위, 최대 허용 나이 차이, 자기 관리 조건부 나이 차이 |
 | 👶 가치관 | 자녀 계획, 역할 분담, 커리어 vs 가정 |
 | 💬 관계 스타일 | 갈등 해결 방식, 감정 표현 빈도, 개인 시간 |
+| ✨ 외모 & 첫인상 | 선호하는 키, 선호하는 체형, 좋아하는 스타일 (자유 입력), 싫어하는 스타일 (자유 입력) |
 
 ## 파트 2: AI 채팅 심리 분석
 
@@ -105,9 +106,11 @@ lib/
 
 ## 비한국어 문자 필터
 
-Groq LLaMA 모델이 한자·러시아어를 혼용하는 문제를 두 단계로 방지:
-1. **프롬프트**: "ONLY Korean Hangul, NEVER use Chinese/Japanese/Russian" 명시
-2. **후처리**: 정규식 `/[一-鿿぀-ヿЀ-ӿ]/g` 로 비한글 CJK/키릴 문자 제거
+Groq LLaMA 모델이 한자·러시아어·영어를 혼용하는 문제를 두 단계로 방지:
+1. **프롬프트**: "ONLY Korean Hangul, NEVER use Chinese/Japanese/Russian/English" 명시
+2. **후처리**: 정규식으로 비한글 문자 제거
+   - CJK/키릴 제거: `/[一-鿿぀-ヿЀ-ӿ]/g`
+   - 영어/라틴 제거: `/[a-zA-Z]+/g`
    - 채팅 API: `app/api/chat/route.ts`
    - 분석 API: `lib/gemini.ts`
 

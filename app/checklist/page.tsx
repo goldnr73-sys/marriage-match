@@ -21,6 +21,13 @@ const defaultChecklist: ChecklistData = {
   conflictStyle: "즉시 대화로 해결",
   emotionExpression: "가끔이면 충분",
   personalTime: "각자 시간 중요",
+  preferredHeight: "상관없음",
+  preferredBodyType: "상관없음",
+  preferredStyle: "",
+  dislikedStyle: "",
+  ageDifference: "상관없음",
+  maxAgeDiff: "상관없음",
+  selfCareAgeTolerance: "상관없음",
 };
 
 export default function ChecklistPage() {
@@ -118,6 +125,16 @@ export default function ChecklistPage() {
                       {data[item.id] as number}점
                     </span>
                   </div>
+                )}
+
+                {item.type === "text" && (
+                  <textarea
+                    value={data[item.id] as string}
+                    onChange={(e) => handleSelect(item.id, e.target.value)}
+                    placeholder={item.placeholder}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-amber-300 resize-none leading-relaxed"
+                  />
                 )}
               </div>
             ))}

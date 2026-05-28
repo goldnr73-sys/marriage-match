@@ -1,9 +1,10 @@
 export interface ChecklistItem {
   id: keyof import('./types').ChecklistData;
   label: string;
-  type: 'select' | 'rating';
+  type: 'select' | 'rating' | 'text';
   options?: string[];
   max?: number;
+  placeholder?: string;
 }
 
 export interface ChecklistCategory {
@@ -80,6 +81,24 @@ export const checklistCategories: ChecklistCategory[] = [
         type: 'select',
         options: ['상관없음', '같은 종교이면 좋겠음', '종교 없는 사람'],
       },
+      {
+        id: 'ageDifference',
+        label: '나이 차이 허용 범위',
+        type: 'select',
+        options: ['상관없음', '동갑 선호', '연상 선호 (1~5살)', '연상 선호 (5살 이상)', '연하 선호 (1~5살)', '연하 선호 (5살 이상)'],
+      },
+      {
+        id: 'maxAgeDiff',
+        label: '최대 허용 나이 차이',
+        type: 'select',
+        options: ['상관없음', '3살 이내', '5살 이내', '10살 이내', '10살 이상도 됨'],
+      },
+      {
+        id: 'selfCareAgeTolerance',
+        label: '자기 관리가 잘 된다면 나이 차이는?',
+        type: 'select',
+        options: ['상관없음', '변화 없음', '5살까지 허용', '8살까지 허용', '10살까지 허용', '나이 제한 없음'],
+      },
     ],
   },
   {
@@ -129,6 +148,37 @@ export const checklistCategories: ChecklistCategory[] = [
         label: '개인 시간 중요도',
         type: 'select',
         options: ['각자 시간 중요', '함께하는 시간이 더 좋음'],
+      },
+    ],
+  },
+  {
+    id: 'appearance',
+    title: '외모 & 첫인상',
+    emoji: '✨',
+    items: [
+      {
+        id: 'preferredHeight',
+        label: '선호하는 키',
+        type: 'select',
+        options: ['상관없음', '나보다 크면 됨', '165cm 이상', '170cm 이상', '175cm 이상', '180cm 이상'],
+      },
+      {
+        id: 'preferredBodyType',
+        label: '선호하는 체형',
+        type: 'select',
+        options: ['상관없음', '슬림한 편', '보통 체형', '건강한 체형 (약간 근육)', '통통해도 괜찮음'],
+      },
+      {
+        id: 'preferredStyle',
+        label: '내가 좋아하는 스타일',
+        type: 'text',
+        placeholder: '예) 깔끔하고 단정한 편, 운동을 즐기는 느낌...',
+      },
+      {
+        id: 'dislikedStyle',
+        label: '내가 싫어하는 스타일',
+        type: 'text',
+        placeholder: '예) 지저분한 옷차림, 과한 향수...',
       },
     ],
   },

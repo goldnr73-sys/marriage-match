@@ -18,6 +18,15 @@ export interface ChecklistData {
   conflictStyle: string;
   emotionExpression: string;
   personalTime: string;
+  // 외모 & 첫인상
+  preferredHeight: string;
+  preferredBodyType: string;
+  preferredStyle: string;
+  dislikedStyle: string;
+  // 나이 차이
+  ageDifference: string;
+  maxAgeDiff: string;
+  selfCareAgeTolerance: string;
 }
 
 export interface ChatMessage {

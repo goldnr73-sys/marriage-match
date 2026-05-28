@@ -59,10 +59,11 @@ export async function POST(req: NextRequest) {
 
     const raw = completion.choices[0].message.content ?? "";
     const isDone = raw.includes("[DONE]");
-    // 한자·일본어·러시아어 등 비한글 문자 제거
+    // 한자·일본어·러시아어·영어 등 비한글 문자 제거
     const cleanContent = raw
       .replace("[DONE]", "")
       .replace(/[一-鿿぀-ヿЀ-ӿ]/g, "")
+      .replace(/[a-zA-Z]+/g, "")
       .replace(/\s{2,}/g, " ")
       .trim();
 
