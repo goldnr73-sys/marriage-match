@@ -5,6 +5,64 @@ import { useRouter } from "next/navigation";
 import { checklistCategories } from "@/lib/checklist";
 import { ChecklistData } from "@/lib/types";
 
+const introSlides = [
+  {
+    title: "소개팅에서, 직장에서,\n처음 만나는 자리에서,",
+    highlight: "나는 어떤 사람과\n잘 맞을까?",
+    sub: "사람들은 나에게 어떤 짝꿍이 맞을까?",
+    emoji: null,
+  },
+  {
+    title: "여기 두 커플이 있습니다.",
+    highlight: null,
+    sub: null,
+    emoji: "💑",
+  },
+  {
+    title: "커플 A",
+    highlight: "첫눈에 반해 결혼했습니다.",
+    sub: "그런데 2년 후, 돈 문제와 가치관 차이로\n매일 다투고 있습니다.",
+    emoji: "😔",
+  },
+  {
+    title: "커플 B",
+    highlight: "결혼 전 서로의 기준을\n먼저 확인했습니다.",
+    sub: "5년이 지난 지금도 큰 갈등 없이\n행복하게 살고 있습니다.",
+    emoji: "😊",
+  },
+  {
+    title: "이들 사이엔 단 하나의 차이가 있습니다.",
+    highlight: "결혼 전, 자신의 기준이\n있었느냐 없었느냐.",
+    sub: null,
+    emoji: null,
+  },
+  {
+    title: "사람마다 결혼에서\n중요하게 생각하는 것이 다릅니다.",
+    highlight: null,
+    sub: "경제적 안정, 가치관의 일치,\n생활 방식, 가족 관계...",
+    emoji: "🤔",
+  },
+  {
+    title: "그렇기 때문에",
+    highlight: "내가 무엇을 원하는지\n먼저 아는 것이",
+    sub: "짝꿍을 찾는 첫걸음입니다.",
+    emoji: null,
+  },
+  {
+    title: "이 검사는 5가지 영역에서\n당신의 결혼 기준을 파악하고,",
+    highlight: null,
+    sub: "AI와의 대화로 스스로도\n몰랐던 가치관까지 분석합니다.",
+    emoji: "🤖",
+  },
+  {
+    title: "지금부터 검사를\n시작해보겠습니다.",
+    highlight: null,
+    sub: null,
+    emoji: "💍",
+    isCta: true,
+  },
+];
+
 const defaultChecklist: ChecklistData = {
   minSalary: "상관없음",
   minAsset: "상관없음",
@@ -34,6 +92,16 @@ export default function ChecklistPage() {
   const router = useRouter();
   const [data, setData] = useState<ChecklistData>(defaultChecklist);
   const [activeCategory, setActiveCategory] = useState(0);
+  const [showIntro, setShowIntro] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const slide = introSlides[currentSlide];
+  const isLastSlide = currentSlide === introSlides.length - 1;
+
+  function handleSlideAdvance() {
+    if (isLastSlide) return;
+    setCurrentSlide((prev) => prev + 1);
+  }
 
   const category = checklistCategories[activeCategory];
   const isLast = activeCategory === checklistCategories.length - 1;
@@ -53,6 +121,84 @@ export default function ChecklistPage() {
 
   function handleBack() {
     if (activeCategory > 0) setActiveCategory((prev) => prev - 1);
+  }
+
+  if (showIntro) {
+    return (
+      <div
+        className="min-h-screen bg-white flex flex-col select-none"
+        onClick={handleSlideAdvance}
+      >
+        {/* 상단 진행 바 */}
+        <div className="h-0.5 bg-gray-100 w-full">
+          <div
+            className="h-full bg-gray-800 transition-all duration-500"
+            style={{ width: `${((currentSlide + 1) / introSlides.length) * 100}%` }}
+          />
+        </div>
+
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-6 pt-4 pb-0">
+          <div />
+          <span className="text-xs text-gray-400 tracking-widest">marriage-match</span>
+          <span className="text-xs text-gray-400">
+            {currentSlide + 1} / {introSlides.length}
+          </span>
+        </div>
+
+        {/* 슬라이드 본문 */}
+        <div className="flex-1 flex flex-col items-center justify-center px-10 text-center gap-6">
+          {slide.emoji && (
+            <span className="text-7xl leading-none">{slide.emoji}</span>
+          )}
+          {slide.title && (
+            <p className="text-gray-400 text-base whitespace-pre-line leading-relaxed">
+              {slide.title}
+            </p>
+          )}
+          {slide.highlight && (
+            <p className="text-gray-900 text-2xl font-bold whitespace-pre-line leading-snug">
+              {slide.highlight}
+            </p>
+          )}
+          {slide.sub && (
+            <p className="text-gray-400 text-sm whitespace-pre-line leading-relaxed">
+              {slide.sub}
+            </p>
+          )}
+          {slide.isCta && (
+            <div className="mt-4 flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setShowIntro(false)}
+                className="px-12 py-4 bg-gray-900 text-white text-base font-semibold rounded-2xl hover:bg-gray-800 transition-colors"
+              >
+                시작하기
+              </button>
+              <span className="text-xs text-gray-400">약 5분 소요 · AI 논문 기반</span>
+            </div>
+          )}
+        </div>
+
+        {/* 하단 도트 + 탭 안내 */}
+        <div className="flex flex-col items-center gap-3 pb-8">
+          <div className="flex gap-1.5">
+            {introSlides.map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-full transition-all duration-300 ${
+                  i === currentSlide
+                    ? "w-5 h-1.5 bg-gray-800"
+                    : "w-1.5 h-1.5 bg-gray-200"
+                }`}
+              />
+            ))}
+          </div>
+          {!isLastSlide && (
+            <span className="text-xs text-gray-400">탭하여 계속</span>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -59,6 +59,15 @@ lib/
   utils.ts                  # base64 인코딩/디코딩 유틸
 ```
 
+## 인트로 슬라이드 (checklist 진입 시)
+
+`/checklist` 페이지 진입 시 9장의 스토리텔링 슬라이드가 먼저 표시됨.
+마지막 슬라이드에서 "시작하기"를 누르면 실제 체크리스트로 진입.
+
+- 구현 위치: `app/checklist/page.tsx` 상단 `introSlides` 배열
+- 상태: `showIntro: boolean`, `currentSlide: number`
+- 탭/클릭으로 슬라이드 진행, 하단 도트 네비게이터, 상단 진행 바 포함
+
 ## 파트 1: 현실 조건 체크리스트
 
 5개 카테고리를 단계별로 입력:
