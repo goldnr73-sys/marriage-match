@@ -13,7 +13,7 @@
 | Framework | Next.js 16 (App Router) + TypeScript |
 | Styling | Tailwind CSS v4 |
 | AI | Groq API (`llama-3.3-70b-versatile`) |
-| 이미지 저장 | `html2canvas` |
+| 이미지 저장 | `html-to-image` (Tailwind v4 oklch 색상 지원) |
 | 배포 | Vercel 권장 |
 
 ## 환경 변수
@@ -29,22 +29,25 @@ GROQ_API_KEY=your_groq_api_key_here
 ## 앱 플로우
 
 ```
-/ (랜딩)
-  → /checklist
+/ → /checklist (랜딩 없이 바로 진입)
       [1] 인트로 슬라이드 (9장, 탭/클릭으로 진행)
       [2] 닉네임 입력 (필수, 최대 10자)
       [3] 현실 조건 체크리스트 (5카테고리)
   → /chat
       [4] 행복이 소개 슬라이드 (6장)
       [5] AI "행복이"와 채팅 심리 분석 (8회 대화)
-  → /result (분석 결과 — 조건 나열 + 심리 분석 + 공유)
+  → /result
+      [6] 커버 페이지 (닉네임 + 4유형 배지 + 결과 보기 버튼)
+      [7] 결과 카드 (조건 나열 + AI 심리 분석 + 공유)
 ```
+
+- `app/page.tsx`는 `/checklist`로 즉시 redirect (랜딩 페이지 없음)
 
 ## 파일 구조
 
 ```
 app/
-  page.tsx                  # 랜딩 페이지
+  page.tsx                  # /checklist로 즉시 redirect (랜딩 없음)
   checklist/page.tsx        # 인트로 슬라이드 → 닉네임 입력 → 체크리스트
   chat/page.tsx             # 행복이 소개 슬라이드 → AI 채팅
   test/page.tsx             # /chat 으로 리다이렉트 (하위 호환)
@@ -188,6 +191,14 @@ AI가 체크리스트 + 채팅 대화 전체를 보고 다음 4가지 중 하나
 
 - 유형 배지: `ResultCard.tsx` 헤더 + 커버 페이지에 표시
 - 유형 설명 카드: AI 심리 분석 섹션 맨 위에 표시 (기존 3카드는 그 아래 유지)
+
+## AI 분석 프롬프트 원칙
+
+`lib/gemini.ts` 프롬프트 설계 원칙:
+- **개인화 최우선**: 실제 대화에서 사용자가 한 말·쓴 단어·답변 방식을 구체적으로 인용
+- **generic 문장 금지**: 누구에게나 해당되는 뻔한 표현 사용 금지
+- **분석 → 유형 순서**: 심층 분석을 먼저 작성하고, 유형은 그 결과로 도출 (역순 방지)
+- **유형이 분석을 오염하지 않도록** 명시적으로 지시
 
 ## AI 분석 결과 구조 (JSON)
 
