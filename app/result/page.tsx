@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { AnalysisResult, ChecklistData, ChatMessage } from "@/lib/types";
 import ResultCard from "@/components/ResultCard";
 import ShareButtons from "@/components/ShareButtons";
@@ -77,11 +77,15 @@ function ResultContent() {
   async function handleSaveImage() {
     const el = document.getElementById("result-card");
     if (!el) return;
-    const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
-    const link = document.createElement("a");
-    link.download = "내_결혼상대_분석.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    try {
+      const dataUrl = await toPng(el, { cacheBust: true, pixelRatio: 2 });
+      const link = document.createElement("a");
+      link.download = "내_결혼상대_분석.png";
+      link.href = dataUrl;
+      link.click();
+    } catch {
+      alert("이미지 저장에 실패했습니다. 다시 시도해주세요.");
+    }
   }
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";

@@ -47,8 +47,8 @@ Respond with ONLY this JSON structure, no other text:
 
   const result = JSON.parse(jsonMatch[0]) as AnalysisResult;
 
-  // 한자·일본어·러시아어 제거
-  const strip = (s: string) => s.replace(/[一-鿿぀-ヿЀ-ӿ]/g, '').replace(/\s{2,}/g, ' ').trim();
+  // 한자·일본어·러시아어·영어 제거
+  const strip = (s: string) => s.replace(/[一-鿿぀-ヿЀ-ӿa-zA-Z]/g, '').replace(/\s{2,}/g, ' ').trim();
   result.psychInsight.insight = strip(result.psychInsight.insight);
   result.psychInsight.hiddenDesire = strip(result.psychInsight.hiddenDesire);
   result.psychInsight.reality = strip(result.psychInsight.reality);
