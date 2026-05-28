@@ -1,96 +1,75 @@
-import { AnalysisResult } from "@/lib/types";
+import { ChecklistData, AnalysisResult } from "@/lib/types";
+import { checklistCategories } from "@/lib/checklist";
 
 interface Props {
+  checklist: ChecklistData;
   result: AnalysisResult;
 }
 
-export default function ResultCard({ result }: Props) {
-  const { partnerProfile, realityCheck, compatibility } = result;
-  const scoreColor =
-    compatibility.score >= 85
-      ? "text-green-600"
-      : compatibility.score >= 70
-      ? "text-amber-600"
-      : "text-orange-600";
+export default function ResultCard({ checklist, result }: Props) {
+  const { psychInsight } = result;
 
   return (
-    <div
-      id="result-card"
-      className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden"
-    >
-      {/* 상단 헤더 */}
-      <div className="bg-gradient-to-br from-amber-400 to-pink-500 p-6 text-white">
-        <p className="text-sm font-medium opacity-80 mb-1">나의 결혼 상대</p>
-        <h2 className="text-3xl font-bold">{partnerProfile.name}</h2>
-        <p className="text-sm opacity-90 mt-1">
-          {partnerProfile.age} · {partnerProfile.job}
-        </p>
-        <p className="text-sm mt-3 italic opacity-90">"{result.tagline}"</p>
+    <div id="result-card" className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden">
+      {/* 헤더 */}
+      <div className="bg-gradient-to-br from-pink-400 to-purple-500 p-6 text-white">
+        <p className="text-sm font-medium opacity-80 mb-1">내가 원하는 결혼 상대 분석</p>
+        <h2 className="text-xl font-bold leading-snug">"{psychInsight.tagline}"</h2>
       </div>
 
-      <div className="p-6 space-y-5">
-        {/* 성격 태그 */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">핵심 특성</h3>
-          <div className="flex flex-wrap gap-2">
-            {partnerProfile.personality.map((trait) => (
-              <span
-                key={trait}
-                className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-200"
-              >
-                {trait}
-              </span>
+      <div className="p-6 space-y-6">
+        {/* 섹션 A: 내가 설정한 조건 */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
+            📋 내가 설정한 조건
+          </h3>
+          <div className="space-y-3">
+            {checklistCategories.map((cat) => (
+              <div key={cat.id} className="bg-stone-50 rounded-2xl p-4">
+                <p className="text-xs font-semibold text-stone-500 mb-2">
+                  {cat.emoji} {cat.title}
+                </p>
+                <div className="space-y-1">
+                  {cat.items.map((item) => {
+                    const value = checklist[item.id];
+                    return (
+                      <div key={item.id} className="flex items-center justify-between text-sm">
+                        <span className="text-stone-500">{item.label}</span>
+                        <span className="font-medium text-stone-800">
+                          {item.type === 'rating' ? `${value}점` : String(value)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* 생활/애정 표현 */}
-        <div className="grid grid-cols-1 gap-3">
-          <div className="bg-stone-50 rounded-2xl p-4">
-            <p className="text-xs text-stone-400 font-medium mb-1">생활 방식</p>
-            <p className="text-sm text-stone-700">{partnerProfile.lifestyle}</p>
-          </div>
-          <div className="bg-stone-50 rounded-2xl p-4">
-            <p className="text-xs text-stone-400 font-medium mb-1">애정 표현 스타일</p>
-            <p className="text-sm text-stone-700">{partnerProfile.loveLanguage}</p>
-          </div>
-        </div>
+        {/* 구분선 */}
+        <div className="border-t border-stone-100" />
 
-        {/* 궁합 점수 */}
-        <div className="bg-stone-50 rounded-2xl p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">궁합 점수</h3>
-            <span className={`text-2xl font-bold ${scoreColor}`}>{compatibility.score}점</span>
-          </div>
-          <div className="w-full h-2 bg-stone-200 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-400 to-pink-500 transition-all"
-              style={{ width: `${compatibility.score}%` }}
-            />
-          </div>
-          <p className="text-sm text-stone-600">{compatibility.summary}</p>
-        </div>
-
-        {/* 현실 체크 */}
+        {/* 섹션 B: AI 심리 분석 */}
         <div className="space-y-3">
-          <div className="bg-green-50 rounded-2xl p-4 border border-green-100">
-            <p className="text-xs font-semibold text-green-600 mb-1">✅ 이 조건의 장점</p>
-            <p className="text-sm text-stone-700">{realityCheck.strengths}</p>
-          </div>
-          <div className="bg-orange-50 rounded-2xl p-4 border border-orange-100">
-            <p className="text-xs font-semibold text-orange-500 mb-1">⚠️ 현실 주의사항</p>
-            <p className="text-sm text-stone-700">{realityCheck.caution}</p>
-          </div>
-          <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100">
-            <p className="text-xs font-semibold text-purple-500 mb-1">🔍 숨겨진 기대 (심리 분석)</p>
-            <p className="text-sm text-stone-700">{realityCheck.blindspot}</p>
-          </div>
-        </div>
+          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
+            🧠 AI 심리 분석
+          </h3>
 
-        {/* 조언 */}
-        <div className="bg-gradient-to-r from-amber-50 to-pink-50 rounded-2xl p-4 border border-amber-100">
-          <p className="text-xs font-semibold text-amber-600 mb-1">💡 성공적인 결혼을 위한 조언</p>
-          <p className="text-sm text-stone-700">{compatibility.tip}</p>
+          <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100">
+            <p className="text-xs font-semibold text-purple-600 mb-1">대화에서 발견된 패턴</p>
+            <p className="text-sm text-stone-700 leading-relaxed">{psychInsight.insight}</p>
+          </div>
+
+          <div className="bg-pink-50 rounded-2xl p-4 border border-pink-100">
+            <p className="text-xs font-semibold text-pink-500 mb-1">🔍 숨겨진 기대</p>
+            <p className="text-sm text-stone-700 leading-relaxed">{psychInsight.hiddenDesire}</p>
+          </div>
+
+          <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+            <p className="text-xs font-semibold text-amber-600 mb-1">⚠️ 현실 체크</p>
+            <p className="text-sm text-stone-700 leading-relaxed">{psychInsight.reality}</p>
+          </div>
         </div>
       </div>
     </div>

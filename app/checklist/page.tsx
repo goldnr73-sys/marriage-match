@@ -38,7 +38,7 @@ export default function ChecklistPage() {
   function handleNext() {
     if (isLast) {
       const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-      router.push(`/test?checklist=${encoded}`);
+      router.push(`/chat?checklist=${encodeURIComponent(encoded)}`);
     } else {
       setActiveCategory((prev) => prev + 1);
     }

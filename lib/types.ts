@@ -20,40 +20,23 @@ export interface ChecklistData {
   personalTime: string;
 }
 
-export interface PsychAnswer {
-  questionId: number;
-  answer: string;
+export interface ChatMessage {
+  role: 'ai' | 'user';
+  content: string;
 }
 
 export interface AnalysisInput {
   checklist: ChecklistData;
-  psychAnswers: PsychAnswer[];
+  chatHistory: ChatMessage[];
 }
 
-export interface PartnerProfile {
-  name: string;
-  age: string;
-  job: string;
-  personality: string[];
-  lifestyle: string;
-  loveLanguage: string;
-}
-
-export interface RealityCheck {
-  strengths: string;
-  caution: string;
-  blindspot: string;
-}
-
-export interface Compatibility {
-  score: number;
-  summary: string;
-  tip: string;
+export interface PsychInsight {
+  insight: string;      // 대화에서 나타난 핵심 패턴
+  hiddenDesire: string; // 숨겨진 기대
+  reality: string;      // 현실 조건과의 괴리 / 주의점
+  tagline: string;      // 한줄 요약
 }
 
 export interface AnalysisResult {
-  partnerProfile: PartnerProfile;
-  realityCheck: RealityCheck;
-  compatibility: Compatibility;
-  tagline: string;
+  psychInsight: PsychInsight;
 }
