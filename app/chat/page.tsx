@@ -6,10 +6,27 @@ import { ChatMessage } from "@/lib/types";
 
 const MAX_EXCHANGES = 8;
 
+function getPreChatSlides(nickname: string) {
+  const name = nickname || "잠깐";
+  return [
+    { text: `${nickname ? nickname + ", " : ""}솔직하게 답해줘서 고마워!` },
+    { text: `이 보고서는 단순한 설문이 아닌,\n${name}의 결혼 가치관을\n심리적으로 분석하는 보고서야.` },
+    { text: `${name}에게 맞는 결혼 상대를\n더 정확하게 알기 위해\n나랑 잠깐 대화해보자.` },
+    { text: "그동안의 연애와 관계 경험을\n되돌아보는 좋은 기회가 될거야." },
+    { text: "솔직하게 얘기해줄수록\n훨씬 정확한 결과를 받아볼 수 있어." },
+    { text: "자, 그러면 시작해보자!", isCta: true },
+  ];
+}
+
 function ChatContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const checklistEncoded = searchParams.get("checklist") ?? "";
+  const nicknameParam = searchParams.get("nickname") ?? "";
+
+  const [showPreChat, setShowPreChat] = useState(true);
+  const [preChatSlide, setPreChatSlide] = useState(0);
+  const [preChatVisible, setPreChatVisible] = useState(true);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -22,12 +39,25 @@ function ChatContent() {
   const progress = Math.min((userCount / MAX_EXCHANGES) * 100, 100);
 
   useEffect(() => {
-    startChat();
-  }, []);
+    if (!showPreChat) startChat();
+  }, [showPreChat]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  function handlePreChatNext() {
+    const slides = getPreChatSlides(nicknameParam);
+    if (preChatSlide < slides.length - 1) {
+      setPreChatVisible(false);
+      setTimeout(() => {
+        setPreChatSlide((p) => p + 1);
+        setPreChatVisible(true);
+      }, 200);
+    } else {
+      setShowPreChat(false);
+    }
+  }
 
   async function startChat() {
     setIsTyping(true);
@@ -35,7 +65,7 @@ function ChatContent() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [], isFirst: true }),
+        body: JSON.stringify({ messages: [], isFirst: true, nickname: nicknameParam }),
       });
       const data = await res.json();
       setMessages([{ role: "ai", content: data.content }]);
@@ -60,7 +90,7 @@ function ChatContent() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, nickname: nicknameParam }),
       });
       const data = await res.json();
       const aiMessages: ChatMessage[] = [...newMessages, { role: "ai", content: data.content }];
@@ -90,6 +120,67 @@ function ChatContent() {
     }
   }
 
+  if (showPreChat) {
+    const slides = getPreChatSlides(nicknameParam);
+    const slide = slides[preChatSlide];
+    const isLast = preChatSlide === slides.length - 1;
+
+    return (
+      <div className="min-h-screen bg-white flex flex-col select-none">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-6 pt-4 pb-0">
+          <div />
+          <span className="text-xs text-gray-400 tracking-widest">marriage-match</span>
+          <div />
+        </div>
+
+        {/* 본문 */}
+        <div
+          className={`flex-1 flex flex-col items-center justify-center px-10 text-center gap-8 transition-opacity duration-200 ${preChatVisible ? "opacity-100" : "opacity-0"}`}
+        >
+          {/* 펄 구체 */}
+          <div className="w-36 h-36 rounded-full bg-gradient-to-br from-gray-50 to-gray-200 shadow-[inset_-8px_-8px_16px_rgba(0,0,0,0.08),inset_4px_4px_8px_rgba(255,255,255,0.9),0_8px_32px_rgba(0,0,0,0.08)]" />
+
+          {/* 텍스트 */}
+          <p className="text-gray-600 text-xl leading-relaxed whitespace-pre-line">
+            {slide.text}
+          </p>
+
+          {/* 버튼 */}
+          {isLast ? (
+            <button
+              onClick={handlePreChatNext}
+              className="px-10 py-4 rounded-2xl bg-gray-900 text-white font-semibold text-base hover:bg-gray-800 transition-colors"
+            >
+              대화 시작하기
+            </button>
+          ) : (
+            <button
+              onClick={handlePreChatNext}
+              className="px-10 py-3 rounded-full bg-gray-100 text-gray-500 text-base hover:bg-gray-200 transition-colors"
+            >
+              다음
+            </button>
+          )}
+        </div>
+
+        {/* 하단 도트 */}
+        <div className="flex justify-center gap-1.5 pb-8">
+          {slides.map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-full transition-all duration-300 ${
+                i === preChatSlide
+                  ? "w-5 h-1.5 bg-gray-800"
+                  : "w-1.5 h-1.5 bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="flex flex-col h-screen max-w-lg mx-auto">
       {/* 헤더 */}
@@ -97,9 +188,9 @@ function ChatContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex items-center justify-center text-white text-sm font-bold">
-              아이
+              행복
             </div>
-            <span className="font-semibold text-stone-800">아이와 대화</span>
+            <span className="font-semibold text-stone-800">행복이와 대화</span>
           </div>
           <span className="text-sm text-stone-400">{Math.round(progress)}%</span>
         </div>
@@ -117,7 +208,7 @@ function ChatContent() {
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "ai" && (
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex-none mr-2 mt-1 flex items-center justify-center text-white text-xs font-bold">
-                아
+                행
               </div>
             )}
             <div
@@ -136,7 +227,7 @@ function ChatContent() {
         {isTyping && (
           <div className="flex justify-start">
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex-none mr-2 mt-1 flex items-center justify-center text-white text-xs font-bold">
-              아
+              행
             </div>
             <div className="bg-white border border-stone-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
               <span className="flex gap-1 items-center h-4">

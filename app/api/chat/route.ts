@@ -4,7 +4,7 @@ import { ChatMessage } from "@/lib/types";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const SYSTEM_PROMPT = `You are a Korean-language marriage psychology analysis AI named "아이".
+const SYSTEM_PROMPT = `You are a Korean-language marriage psychology analysis AI named "행복이".
 Your task is to have a natural conversation in KOREAN ONLY to understand the user's expectations about a marriage partner.
 
 CRITICAL LANGUAGE RULE:
@@ -30,10 +30,14 @@ After the user's 8th reply, wrap up warmly in Korean and add exactly this at the
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, isFirst }: { messages: ChatMessage[]; isFirst?: boolean } = await req.json();
+    const { messages, isFirst, nickname }: { messages: ChatMessage[]; isFirst?: boolean; nickname?: string } = await req.json();
+
+    const nameClause = nickname
+      ? `\nThe user's nickname is "${nickname}". Address them as "${nickname}" naturally in conversation.`
+      : "";
 
     const groqMessages: Groq.Chat.ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: SYSTEM_PROMPT + nameClause },
     ];
 
     if (isFirst) {

@@ -30,9 +30,14 @@ GROQ_API_KEY=your_groq_api_key_here
 
 ```
 / (랜딩)
-  → /checklist  (파트1: 현실 조건 체크리스트, 5카테고리)
-    → /chat     (파트2: AI "아이"와 채팅 심리 분석, 8회 대화)
-      → /result (분석 결과 — 조건 나열 + 심리 분석 + 공유)
+  → /checklist
+      [1] 인트로 슬라이드 (9장, 탭/클릭으로 진행)
+      [2] 닉네임 입력 (필수, 최대 10자)
+      [3] 현실 조건 체크리스트 (5카테고리)
+  → /chat
+      [4] 행복이 소개 슬라이드 (6장)
+      [5] AI "행복이"와 채팅 심리 분석 (8회 대화)
+  → /result (분석 결과 — 조건 나열 + 심리 분석 + 공유)
 ```
 
 ## 파일 구조
@@ -40,12 +45,12 @@ GROQ_API_KEY=your_groq_api_key_here
 ```
 app/
   page.tsx                  # 랜딩 페이지
-  checklist/page.tsx        # 현실 조건 체크리스트 (5카테고리 스텝)
-  chat/page.tsx             # AI 채팅 심리 분석 페이지
+  checklist/page.tsx        # 인트로 슬라이드 → 닉네임 입력 → 체크리스트
+  chat/page.tsx             # 행복이 소개 슬라이드 → AI 채팅
   test/page.tsx             # /chat 으로 리다이렉트 (하위 호환)
   result/page.tsx           # 분석 결과 + URL/이미지 공유
   api/
-    chat/route.ts           # 채팅 AI API (Groq)
+    chat/route.ts           # 채팅 AI API (Groq) — 닉네임 수신 후 프롬프트 반영
     analyze/route.ts        # 결과 분석 API (Groq)
 
 components/
@@ -59,16 +64,52 @@ lib/
   utils.ts                  # base64 인코딩/디코딩 유틸
 ```
 
-## 인트로 슬라이드 (checklist 진입 시)
+## URL 파라미터 흐름
 
-`/checklist` 페이지 진입 시 9장의 스토리텔링 슬라이드가 먼저 표시됨.
-마지막 슬라이드에서 "시작하기"를 누르면 실제 체크리스트로 진입.
+```
+/checklist
+  → /chat?checklist=BASE64&nickname=URL_ENCODED
+    → /result?checklist=BASE64&chat=BASE64
+```
 
-- 구현 위치: `app/checklist/page.tsx` 상단 `introSlides` 배열
-- 상태: `showIntro: boolean`, `currentSlide: number`
-- 탭/클릭으로 슬라이드 진행, 하단 도트 네비게이터, 상단 진행 바 포함
+- `nickname`: 체크리스트 닉네임 입력 → chat API 시스템 프롬프트에 삽입
+- `checklist`: 5카테고리 선택값 JSON → base64
+- `chat`: 대화 메시지 배열 JSON → base64
 
-## 파트 1: 현실 조건 체크리스트
+## [1] 인트로 슬라이드 (checklist 진입 시)
+
+`/checklist` 진입 시 9장 스토리텔링 슬라이드 표시.
+
+- 구현: `app/checklist/page.tsx` 상단 `introSlides` 배열
+- 상태: `showIntro: boolean`, `currentSlide: number`, `visible: boolean`
+- 슬라이드 전환 시 200ms 페이드 애니메이션 (`transition-opacity duration-200`)
+- 탭/클릭으로 진행, 하단 도트 네비게이터, 상단 진행 바
+- 마지막 슬라이드 "시작하기" → 닉네임 입력 화면으로 전환
+
+### 슬라이드 구성 (9장)
+
+| # | highlight | title/sub |
+|---|-----------|-----------|
+| 1 | 결혼, 언제쯤 하게 될까요? | — |
+| 2 | 어떤 사람과 하느냐입니다. | title: 언제보다 더 중요한 건, |
+| 3 | 막상 말하기 어렵지 않으세요? | title: 그런데 '어떤 사람'인지 |
+| 4 | — | title: A씨는 설렘으로 결혼을 결정했습니다. / sub: 나중에서야 깨달았습니다. |
+| 5 | "나는 어떤 사람이 필요한가?" | title: B씨는 먼저 자신에게 물었습니다. |
+| 6 | 자신의 기준이 있었느냐 없었느냐입니다. | title: 차이는 결혼 전, |
+| 7 | — | title: 결혼에서 중요한 건 사람마다 다릅니다. / sub: 돈? 가치관? 생활 방식? 가족 관계? |
+| 8 | 당신도 몰랐던 기준이 보입니다. | title: 행복이와 이야기하다 보면, |
+| 9 | 지금부터 검사를 시작해볼까요? | isCta: true |
+
+## [2] 닉네임 입력
+
+인트로 마지막 슬라이드 "시작하기" 클릭 후 표시.
+
+- 구현: `app/checklist/page.tsx` `showNickname` 상태
+- 필수 입력 (빈값이면 버튼 비활성화), 최대 10자
+- Enter 또는 "테스트 시작하기" 버튼으로 체크리스트 진입
+- 건너뛰기 없음
+
+## [3] 파트 1: 현실 조건 체크리스트
 
 5개 카테고리를 단계별로 입력:
 
@@ -80,13 +121,36 @@ lib/
 | 💬 관계 스타일 | 갈등 해결 방식, 감정 표현 빈도, 개인 시간 |
 | ✨ 외모 & 첫인상 | 선호하는 키, 선호하는 체형, 좋아하는 스타일 (자유 입력), 싫어하는 스타일 (자유 입력) |
 
-## 파트 2: AI 채팅 심리 분석
+## [4] 행복이 소개 슬라이드 (chat 진입 시)
 
-- AI 캐릭터 **"아이"** 가 먼저 말을 걸고 반말로 자연스럽게 대화
+`/chat` 진입 시 체크리스트 완료를 축하하고 대화를 예고하는 6장 슬라이드 표시.
+행복이(AI)가 사용자에게 직접 말을 거는 형식 (반말).
+
+- 구현: `app/chat/page.tsx` `getPreChatSlides(nickname)` 함수 + `showPreChat` 상태
+- 상태: `showPreChat: boolean`, `preChatSlide: number`, `preChatVisible: boolean`
+- 200ms 페이드 애니메이션
+- 마지막 슬라이드 "대화 시작하기" 클릭 시 `startChat()` API 호출 시작
+- 디자인: 흰 배경, CSS 펄 구체, "다음"(회색 pill) / "대화 시작하기"(검정 버튼), 하단 도트
+
+### 슬라이드 구성 (6장, {닉네임} 보간)
+
+| # | 텍스트 |
+|---|--------|
+| 1 | `{닉네임}, 솔직하게 답해줘서 고마워!` |
+| 2 | `이 보고서는 단순한 설문이 아닌, {닉네임}의 결혼 가치관을 심리적으로 분석하는 보고서야.` |
+| 3 | `{닉네임}에게 맞는 결혼 상대를 더 정확하게 알기 위해 나랑 잠깐 대화해보자.` |
+| 4 | `그동안의 연애와 관계 경험을 되돌아보는 좋은 기회가 될거야.` |
+| 5 | `솔직하게 얘기해줄수록 훨씬 정확한 결과를 받아볼 수 있어.` |
+| 6 | `자, 그러면 시작해보자!` + "대화 시작하기" 버튼 |
+
+## [5] 파트 2: AI 채팅 심리 분석
+
+- AI 캐릭터 **"행복이"** 가 먼저 말을 걸고 반말로 자연스럽게 대화
 - 사용자가 자유 텍스트로 답변 (선택지 없음)
 - 8번 대화 후 자동 종료 → 결과 페이지로 이동
 - 진행도 바 + `●●●` 타이핑 인디케이터
 - 탐색 주제: 갈등 태도 / 경제관 / 가족 관계 / 개인 시간 / 감정 표현 / 미래 계획
+- 닉네임이 있으면 행복이가 대화 중 닉네임으로 호칭
 
 ## 결과 화면 구성
 
@@ -113,6 +177,16 @@ lib/
 }
 ```
 
+## AI 캐릭터: 행복이
+
+- 이름: **행복이** (구: 아이)
+- 시스템 프롬프트: `app/api/chat/route.ts` `SYSTEM_PROMPT`
+- 닉네임 처리: 요청 body의 `nickname` 값을 받아 `nameClause`로 프롬프트에 추가
+  ```
+  The user's nickname is "{nickname}". Address them as "{nickname}" naturally in conversation.
+  ```
+- 아바타: `bg-gradient-to-br from-pink-300 to-purple-400`, 텍스트 "행"
+
 ## 비한국어 문자 필터
 
 Groq LLaMA 모델이 한자·러시아어·영어를 혼용하는 문제를 두 단계로 방지:
@@ -123,15 +197,10 @@ Groq LLaMA 모델이 한자·러시아어·영어를 혼용하는 문제를 두 
    - 채팅 API: `app/api/chat/route.ts`
    - 분석 API: `lib/gemini.ts`
 
-## URL 공유
-
-- 결과 URL에 checklist + chat 데이터 포함 (base64 인코딩)
-- `/result?checklist=BASE64&chat=BASE64` 형태
-- 로그인 불필요
-
 ## 개발 서버 실행
 
 ```bash
+cd /Users/geumdain/newidea/marriage-match
 npm run dev
 # → http://localhost:3000
 ```
@@ -142,3 +211,8 @@ npm run dev
 npx vercel --prod
 # 환경 변수 GROQ_API_KEY 설정 필요
 ```
+
+## GitHub
+
+- Repository: `goldnr73-sys/marriage-match`
+- Branch: `main`

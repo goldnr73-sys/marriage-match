@@ -7,56 +7,56 @@ import { ChecklistData } from "@/lib/types";
 
 const introSlides = [
   {
-    title: "소개팅에서, 직장에서,\n처음 만나는 자리에서,",
-    highlight: "나는 어떤 사람과\n잘 맞을까?",
-    sub: "사람들은 나에게 어떤 짝꿍이 맞을까?",
+    title: null,
+    highlight: "결혼, 언제쯤 하게 될까요?",
+    sub: null,
     emoji: null,
   },
   {
-    title: "여기 두 커플이 있습니다.",
-    highlight: null,
+    title: "언제보다 더 중요한 건,",
+    highlight: "어떤 사람과 하느냐입니다.",
     sub: null,
-    emoji: "💑",
+    emoji: null,
   },
   {
-    title: "커플 A",
-    highlight: "첫눈에 반해 결혼했습니다.",
-    sub: "그런데 2년 후, 돈 문제와 가치관 차이로\n매일 다투고 있습니다.",
+    title: "그런데 '어떤 사람'인지",
+    highlight: "막상 말하기 어렵지 않으세요?",
+    sub: null,
+    emoji: null,
+  },
+  {
+    title: "A씨는 설렘으로 결혼을 결정했습니다.",
+    highlight: null,
+    sub: "나중에서야 깨달았습니다.",
     emoji: "😔",
   },
   {
-    title: "커플 B",
-    highlight: "결혼 전 서로의 기준을\n먼저 확인했습니다.",
-    sub: "5년이 지난 지금도 큰 갈등 없이\n행복하게 살고 있습니다.",
+    title: "B씨는 먼저 자신에게 물었습니다.",
+    highlight: "\"나는 어떤 사람이 필요한가?\"",
+    sub: null,
     emoji: "😊",
   },
   {
-    title: "이들 사이엔 단 하나의 차이가 있습니다.",
-    highlight: "결혼 전, 자신의 기준이\n있었느냐 없었느냐.",
+    title: "차이는 결혼 전,",
+    highlight: "자신의 기준이 있었느냐 없었느냐입니다.",
     sub: null,
     emoji: null,
   },
   {
-    title: "사람마다 결혼에서\n중요하게 생각하는 것이 다릅니다.",
+    title: "결혼에서 중요한 건 사람마다 다릅니다.",
     highlight: null,
-    sub: "경제적 안정, 가치관의 일치,\n생활 방식, 가족 관계...",
+    sub: "돈? 가치관? 생활 방식? 가족 관계?",
     emoji: "🤔",
   },
   {
-    title: "그렇기 때문에",
-    highlight: "내가 무엇을 원하는지\n먼저 아는 것이",
-    sub: "짝꿍을 찾는 첫걸음입니다.",
+    title: "행복이와 이야기하다 보면,",
+    highlight: "당신도 몰랐던 기준이 보입니다.",
+    sub: null,
     emoji: null,
   },
   {
-    title: "이 검사는 5가지 영역에서\n당신의 결혼 기준을 파악하고,",
-    highlight: null,
-    sub: "AI와의 대화로 스스로도\n몰랐던 가치관까지 분석합니다.",
-    emoji: "🤖",
-  },
-  {
-    title: "지금부터 검사를\n시작해보겠습니다.",
-    highlight: null,
+    title: null,
+    highlight: "지금부터 검사를 시작해볼까요?",
     sub: null,
     emoji: "💍",
     isCta: true,
@@ -94,13 +94,20 @@ export default function ChecklistPage() {
   const [activeCategory, setActiveCategory] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [showNickname, setShowNickname] = useState(false);
+  const [nickname, setNickname] = useState("");
 
   const slide = introSlides[currentSlide];
   const isLastSlide = currentSlide === introSlides.length - 1;
 
   function handleSlideAdvance() {
     if (isLastSlide) return;
-    setCurrentSlide((prev) => prev + 1);
+    setVisible(false);
+    setTimeout(() => {
+      setCurrentSlide((prev) => prev + 1);
+      setVisible(true);
+    }, 200);
   }
 
   const category = checklistCategories[activeCategory];
@@ -113,7 +120,8 @@ export default function ChecklistPage() {
   function handleNext() {
     if (isLast) {
       const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-      router.push(`/chat?checklist=${encodeURIComponent(encoded)}`);
+      const nick = encodeURIComponent(nickname);
+      router.push(`/chat?checklist=${encodeURIComponent(encoded)}&nickname=${nick}`);
     } else {
       setActiveCategory((prev) => prev + 1);
     }
@@ -147,7 +155,7 @@ export default function ChecklistPage() {
         </div>
 
         {/* 슬라이드 본문 */}
-        <div className="flex-1 flex flex-col items-center justify-center px-10 text-center gap-6">
+        <div className={`flex-1 flex flex-col items-center justify-center px-10 text-center gap-6 transition-opacity duration-200 ${visible ? "opacity-100" : "opacity-0"}`}>
           {slide.emoji && (
             <span className="text-7xl leading-none">{slide.emoji}</span>
           )}
@@ -169,7 +177,7 @@ export default function ChecklistPage() {
           {slide.isCta && (
             <div className="mt-4 flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
               <button
-                onClick={() => setShowIntro(false)}
+                onClick={() => { setShowIntro(false); setShowNickname(true); }}
                 className="px-12 py-4 bg-gray-900 text-white text-base font-semibold rounded-2xl hover:bg-gray-800 transition-colors"
               >
                 시작하기
@@ -196,6 +204,45 @@ export default function ChecklistPage() {
           {!isLastSlide && (
             <span className="text-xs text-gray-400">탭하여 계속</span>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (showNickname) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col select-none">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-6 pt-4 pb-0">
+          <div />
+          <span className="text-xs text-gray-400 tracking-widest">marriage-match</span>
+          <div />
+        </div>
+
+        {/* 본문 */}
+        <div className="flex-1 flex flex-col items-center justify-center px-10 text-center gap-6">
+          <span className="text-6xl leading-none">💬</span>
+          <p className="text-gray-900 text-2xl font-bold leading-snug">
+            어떻게 불러드릴까요?
+          </p>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value.slice(0, 10))}
+            onKeyDown={(e) => { if (e.key === "Enter") setShowNickname(false); }}
+            placeholder="닉네임을 입력하세요"
+            autoFocus
+            className="w-full max-w-xs px-4 py-3 rounded-2xl border border-gray-200 text-center text-base focus:outline-none focus:border-gray-400 bg-gray-50"
+          />
+          <div className="flex flex-col items-center gap-3 mt-2">
+            <button
+              onClick={() => setShowNickname(false)}
+              disabled={!nickname.trim()}
+              className="px-12 py-4 bg-gray-900 text-white text-base font-semibold rounded-2xl hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              테스트 시작하기
+            </button>
+          </div>
         </div>
       </div>
     );
