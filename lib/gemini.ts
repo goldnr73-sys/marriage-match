@@ -17,13 +17,21 @@ Use ONLY Korean Hangul (한글), spaces, numbers, and basic punctuation like .,!
 [대화 내용]
 ${chatSummary}
 
+The user's partner-seeking style must be classified into ONE of these 4 types:
+- 안정탐색형: Prioritizes economic stability and trust above all
+- 감성교류형: Seeks deep conversation and emotional sharing
+- 독립동반자형: Values personal autonomy with equal partnership
+- 가정헌신형: Centers on family, stability, and mutual devotion
+
 Respond with ONLY this JSON structure, no other text:
 {
   "psychInsight": {
     "insight": "2-3 sentences in Korean describing the core psychological pattern found in the conversation",
     "hiddenDesire": "2-3 sentences in Korean describing hidden expectations the user may not be aware of",
     "reality": "2-3 sentences in Korean with honest, direct reality check about contradictions or concerns",
-    "tagline": "One memorable Korean sentence summarizing this person's view on marriage"
+    "tagline": "One memorable Korean sentence summarizing this person's view on marriage",
+    "partnerType": "안정탐색형 or 감성교류형 or 독립동반자형 or 가정헌신형",
+    "typeDescription": "1-2 sentences in Korean explaining why this type fits this person"
   }
 }`;
 
@@ -45,6 +53,7 @@ Respond with ONLY this JSON structure, no other text:
   result.psychInsight.hiddenDesire = strip(result.psychInsight.hiddenDesire);
   result.psychInsight.reality = strip(result.psychInsight.reality);
   result.psychInsight.tagline = strip(result.psychInsight.tagline);
+  result.psychInsight.typeDescription = strip(result.psychInsight.typeDescription);
 
   return result;
 }

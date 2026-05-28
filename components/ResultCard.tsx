@@ -1,6 +1,13 @@
 import { ChecklistData, AnalysisResult } from "@/lib/types";
 import { checklistCategories } from "@/lib/checklist";
 
+const TYPE_EMOJI: Record<string, string> = {
+  '안정탐색형': '🏛️',
+  '감성교류형': '💬',
+  '독립동반자형': '🌿',
+  '가정헌신형': '🏡',
+};
+
 interface Props {
   checklist: ChecklistData;
   result: AnalysisResult;
@@ -13,6 +20,12 @@ export default function ResultCard({ checklist, result }: Props) {
     <div id="result-card" className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden">
       {/* 헤더 */}
       <div className="bg-gradient-to-br from-pink-400 to-purple-500 p-6 text-white">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-lg">{TYPE_EMOJI[psychInsight.partnerType] ?? '💍'}</span>
+          <span className="text-sm font-bold bg-white/20 px-3 py-0.5 rounded-full">
+            {psychInsight.partnerType}
+          </span>
+        </div>
         <p className="text-sm font-medium opacity-80 mb-1">내가 원하는 결혼 상대 분석</p>
         <h2 className="text-xl font-bold leading-snug">"{psychInsight.tagline}"</h2>
       </div>
@@ -55,6 +68,13 @@ export default function ResultCard({ checklist, result }: Props) {
           <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
             🧠 AI 심리 분석
           </h3>
+
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 border border-pink-100">
+            <p className="text-xs font-semibold text-purple-600 mb-1">
+              {TYPE_EMOJI[psychInsight.partnerType] ?? '💍'} {psychInsight.partnerType}
+            </p>
+            <p className="text-sm text-stone-700 leading-relaxed">{psychInsight.typeDescription}</p>
+          </div>
 
           <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100">
             <p className="text-xs font-semibold text-purple-600 mb-1">대화에서 발견된 패턴</p>

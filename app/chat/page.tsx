@@ -110,7 +110,8 @@ function ChatContent() {
 
   function goToResult(finalMessages: ChatMessage[]) {
     const chatEncoded = encodeURIComponent(btoa(encodeURIComponent(JSON.stringify(finalMessages))));
-    router.push(`/result?checklist=${checklistEncoded}&chat=${chatEncoded}`);
+    const nicknameEncoded = encodeURIComponent(nicknameParam);
+    router.push(`/result?checklist=${checklistEncoded}&chat=${chatEncoded}&nickname=${nicknameEncoded}`);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {

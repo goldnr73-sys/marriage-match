@@ -40,10 +40,12 @@ export interface AnalysisInput {
 }
 
 export interface PsychInsight {
-  insight: string;      // 대화에서 나타난 핵심 패턴
-  hiddenDesire: string; // 숨겨진 기대
-  reality: string;      // 현실 조건과의 괴리 / 주의점
-  tagline: string;      // 한줄 요약
+  insight: string;
+  hiddenDesire: string;
+  reality: string;
+  tagline: string;
+  partnerType: '안정탐색형' | '감성교류형' | '독립동반자형' | '가정헌신형';
+  typeDescription: string;
 }
 
 export interface AnalysisResult {

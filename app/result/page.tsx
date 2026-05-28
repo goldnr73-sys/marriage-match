@@ -16,6 +16,13 @@ function safeDecodeB64(encoded: string) {
   }
 }
 
+const TYPE_EMOJI: Record<string, string> = {
+  '안정탐색형': '🏛️',
+  '감성교류형': '💬',
+  '독립동반자형': '🌿',
+  '가정헌신형': '🏡',
+};
+
 function ResultContent() {
   const searchParams = useSearchParams();
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -23,6 +30,8 @@ function ResultContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingText, setLoadingText] = useState("대화 내용을 분석하는 중...");
+  const [showCover, setShowCover] = useState(true);
+  const nickname = searchParams.get("nickname") ?? "";
 
   useEffect(() => {
     const checklistParam = searchParams.get("checklist");
@@ -101,6 +110,41 @@ function ResultContent() {
           <Link href="/" className="block px-6 py-3 bg-amber-400 text-white rounded-2xl font-medium hover:bg-amber-500 transition-colors">
             처음으로 돌아가기
           </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (showCover) {
+    const typeEmoji = TYPE_EMOJI[result.psychInsight.partnerType] ?? '💍';
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center px-6">
+        <div className="text-center space-y-8 max-w-sm w-full">
+          <div className="text-7xl">💍</div>
+          <div className="space-y-2">
+            <p className="text-xs text-stone-400 font-medium tracking-widest uppercase">Analysis Complete</p>
+            <h1 className="text-2xl font-bold text-stone-900">
+              {nickname ? `${nickname}님의` : "나의"} 결혼 파트너 성향
+            </h1>
+          </div>
+          <div className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-full">
+            <span className="text-xl">{typeEmoji}</span>
+            <span className="text-base font-bold text-stone-800">{result.psychInsight.partnerType}</span>
+          </div>
+          <div className="flex justify-center gap-6 text-sm text-stone-500">
+            <span className="flex items-center gap-1.5">
+              <span className="text-green-500 font-bold">✓</span> 체크리스트 완료
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-green-500 font-bold">✓</span> 행복이 대화 완료
+            </span>
+          </div>
+          <button
+            onClick={() => setShowCover(false)}
+            className="w-full py-4 bg-stone-900 text-white rounded-2xl font-semibold text-base hover:bg-stone-700 transition-colors"
+          >
+            결과 보기 →
+          </button>
         </div>
       </main>
     );
